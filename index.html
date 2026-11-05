@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discover Warsaw</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            color: #39294f;
+            font-family: Arial, sans-serif;
+            line-height: 1.7;
+            background: #f7f2fc;
+        }
+
+        /* Google map background */
+        .map-background {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background: #f7f2fc;
+        }
+
+        .map-background iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            pointer-events: none;
+        }
+
+        .map-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: rgba(252, 248, 255, 0.84);
+            pointer-events: none;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 18px 7%;
+            background: #ffffff;
+            border-bottom: 5px solid #ffd34e;
+        }
+
+        .logo {
+            color: #722db0;
+            font-family: Georgia, serif;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #542080;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            color: #b16ad3;
+        }
+
+        /* Sunny Warsaw main picture */
+        .hero {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            padding: 130px 7% 140px;
+            color: white;
+            text-align: center;
+            background: #39294f;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -2;
+            background:
+                url("warsaw-sunny.jpg")
+                center / cover no-repeat;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            background: linear-gradient(
+                rgba(0, 0, 0, 0.25),
+                rgba(0, 0, 0, 0.48)
+            );
+        }
+
+        .hero-content {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .eyebrow {
+            margin: 0 0 12px;
+            color: #ffe172;
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        h1,
+        h2 {
+            font-family: Georgia, serif;
+            line-height: 1.2;
+        }
+
+        .hero h1 {
+            margin: 0 0 20px;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .hero p:not(.eyebrow) {
+            margin: 0 auto 30px;
+            font-size: 1.15rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+
+        .button {
+            display: inline-block;
+            padding: 14px 30px;
+            border-radius: 30px;
+            background: #ffd34e;
+            color: #39204f;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0 7px 18px rgba(25, 8, 42, 0.3);
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .button:hover {
+            background: #ffe783;
+            transform: translateY(-3px);
+        }
+
+        main {
+            max-width: 1100px;
+            margin: auto;
+            padding: 40px 7% 80px;
+        }
+
+        .intro {
+            max-width: 760px;
+            margin: 30px auto 70px;
+            text-align: center;
+        }
+
+        .intro h2 {
+            margin-bottom: 15px;
+            color: #3f6b5b;
+            font-size: 2.4rem;
+        }
+
+        .section {
+            margin-bottom: 90px;
+        }
+
+        .section-label {
+            margin: 0 0 10px;
+            color: #9b48b8;
+            font-size: 0.8rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .section h2 {
+            margin: 0 0 18px;
+            color: #3f6b5b;
+            font-size: clamp(1.65rem, 3vw, 2.4rem);
+        }
+
+        .section p {
+            color: #49365b;
+        }
+
+        figure {
+            margin: 0;
+        }
+
+        .photo {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border: 2px solid #9b48b8;
+            border-radius: 4px;
+            box-shadow: 0 8px 24px rgba(83, 39, 116, 0.15);
+        }
+
+        figcaption {
+            margin-top: 8px;
+            color: #542080;
+            font-size: 0.9rem;
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* Palace collage */
+        .palace-gallery {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 20px;
+            align-items: center;
+            margin-top: 28px;
+        }
+
+        .palace-gallery figure {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .palace-gallery .main-photo img {
+            max-height: 600px;
+        }
+
+        .palace-side {
+            display: grid;
+            gap: 20px;
+        }
+
+        .palace-side img {
+            max-height: 280px;
+        }
+
+        /* Walking section */
+        .walking-text p {
+            margin: 0 0 14px;
+        }
+
+        .walking-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            align-items: start;
+            gap: 18px;
+            margin-top: 28px;
+        }
+
+        .walking-gallery figure {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .walking-gallery .river-photo img {
+            width: auto;
+            max-width: 100%;
+            max-height: 300px;
+        }
+
+        /*
+          Both mural pictures have the same frame size.
+          The whole picture remains visible.
+        */
+        .walking-gallery .mural-photo img {
+            width: 100%;
+            height: 260px;
+            object-fit: contain;
+        }
+
+        /* Shopping and food sections */
+        .split-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 55px;
+        }
+
+        .split-section figure {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .split-section img {
+            max-height: 360px;
+        }
+
+        .closing {
+            padding: 70px 25px;
+            border-radius: 18px;
+            background: #ddebe1;
+            color: #284c3d;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(63, 107, 91, 0.2);
+        }
+
+        .closing .eyebrow {
+            color: #4d6958;
+        }
+
+        .closing h2 {
+            margin: 0 0 15px;
+            color: #3f6b5b;
+            font-size: 2.7rem;
+        }
+
+        .closing p:not(.eyebrow) {
+            max-width: 680px;
+            margin: auto;
+            color: #284c3d;
+        }
+
+        footer {
+            padding: 25px;
+            color: #49365b;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        footer a {
+            color: #642695;
+            font-weight: bold;
+        }
+
+        @media (max-width: 700px) {
+            nav {
+                justify-content: center;
+            }
+
+            .nav-links {
+                justify-content: center;
+                gap: 12px 18px;
+            }
+
+            .hero {
+                padding: 90px 7%;
+            }
+
+            .section {
+                margin-bottom: 65px;
+            }
+
+            .palace-gallery,
+            .split-section,
+            .walking-gallery {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .palace-gallery .main-photo img,
+            .palace-side img,
+            .split-section img {
+                max-height: 350px;
+            }
+
+            .walking-gallery .mural-photo img {
+                width: 100%;
+                max-width: 400px;
+                height: 280px;
+            }
+
+            .food-photo {
+                order: 2;
+            }
+        }
+        /* Walking section: more room for text and matching image sizes */
+        #nature {
+            width: 92%;
+            margin-left: 5%;
+        }
+
+        .walking-gallery figure img {
+            display: block;
+            width: 100%;
+            height: 250px;
+            max-width: 100%;
+            max-height: none;
+            object-fit: fill;
+        }
+
+        @media (max-width: 700px) {
+            #nature {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .walking-gallery figure {
+                width: 100%;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+
+            .walking-gallery figure img {
+                width: 100%;
+                height: 280px;
+                max-width: 100%;
+            }
+        }
+        /* Matching images and right-shifted walking section */
+        #nature { width: 92%; margin-left: 8%; }
+        #nature .walking-gallery figure { min-width: 0; width: 100%; }
+        #nature .walking-gallery figure img {
+            display: block;
+            width: 100%;
+            height: 240px;
+            max-width: 100%;
+            max-height: none;
+            object-fit: fill;
+            border: 2px solid #9b48b8;
+        }
+        @media (max-width: 700px) {
+            #nature { width: 100%; margin-left: 0; }
+            #nature .walking-gallery figure { max-width: 400px; margin: 0 auto; }
+            #nature .walking-gallery figure img { width: 100%; height: 280px; }
+        }
+        /* Preserve the proportions of all three walking photos */
+        #nature { width: 86%; margin-left: 14%; }
+        #nature .walking-gallery figure {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #nature .walking-gallery figure img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 380px;
+            object-fit: initial;
+        }
+        @media (max-width: 700px) {
+            #nature { width: 100%; margin-left: 0; }
+            #nature .walking-gallery figure img {
+                width: auto;
+                height: auto;
+                max-width: 100%;
+                max-height: 400px;
+            }
+        }
+        /* Give the middle walking photo the full width of its column. */
+        #nature .walking-gallery figure:nth-child(2) img {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            max-height: none;
+        }
+        /* Give the middle photo a visibly wider column. */
+        @media (min-width: 701px) {
+            #nature .walking-gallery {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr) minmax(0, 1fr);
+                align-items: center;
+            }
+            #nature .walking-gallery figure:nth-child(2) img {
+                width: 100%;
+                height: auto;
+                max-height: none;
+            }
+        }
+        /* Smaller palace image and tighter spacing between sections. */
+        .palace-gallery { grid-template-columns: 1fr 1fr; gap: 8px; }
+        .palace-gallery .main-photo img { max-width: 85%; max-height: 450px; }
+        .palace-side { gap: 12px; }
+        .section { margin-bottom: 55px; }
+        @media (max-width: 700px) {
+            .section { margin-bottom: 45px; }
+            .palace-gallery { gap: 16px; }
+            .palace-gallery .main-photo img { max-width: 100%; max-height: 300px; }
+        }
+        @media (min-width: 701px) {
+            .palace-gallery .main-photo { align-items: flex-end; }
+            .palace-side figure { align-items: flex-start; }
+        }
+        /* Palace collage: smaller main image, more space, centered captions. */
+        .palace-gallery { gap: 28px; }
+        .palace-gallery .main-photo { max-width: 72%; }
+        .palace-gallery .main-photo img { max-width: 100%; max-height: 360px; }
+        .palace-gallery figure { width: fit-content; max-width: 100%; }
+        .palace-gallery figure figcaption { width: 100%; text-align: center; }
+        @media (min-width: 701px) {
+            .palace-gallery .main-photo { justify-self: end; }
+            .palace-side figure { justify-self: start; }
+        }
+        @media (max-width: 700px) {
+            .palace-gallery figure { justify-self: center; align-items: center; }
+            .palace-gallery .main-photo img { max-width: 100%; max-height: 260px; }
+        }
+        /* Winter and summer photos frame the two personal photos. */
+        .palace-gallery {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 24px;
+            align-items: center;
+        }
+        .palace-gallery figure,
+        .palace-gallery .palace-side figure {
+            width: auto;
+            max-width: 100%;
+            justify-self: center;
+            align-items: center;
+        }
+        .palace-gallery .palace-outer img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 360px;
+        }
+        .palace-gallery .palace-side img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 270px;
+        }
+        @media (max-width: 700px) {
+            .palace-gallery { grid-template-columns: 1fr; }
+            .palace-gallery .palace-outer img { max-height: 350px; }
+        }
+        /* Smaller shopping pictures with more space between them. */
+        #shopping figure { gap: 30px; }
+        #shopping figure img {
+            width: auto;
+            height: auto;
+            max-width: 85%;
+            max-height: 240px;
+        }
+
+        /* Preserve each walking photograph's original proportions. */
+        #nature .walking-gallery figure img {
+            height: auto;
+            object-fit: initial;
+        }
+        /* Keep the two shopping pictures the same size. */
+        #shopping figure img {
+            width: min(100%, 300px);
+            height: 210px;
+            max-width: 100%;
+            max-height: none;
+            object-fit: cover;
+        }
+        #shopping .shopping-photos {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            margin-top: 20px;
+        }
+        #shopping .shopping-photos figure { gap: 0; margin: 0; }
+        #shopping .shopping-photos figcaption {
+            margin-top: 8px;
+            color: #542080;
+            font-size: 0.9rem;
+            font-style: italic;
+            text-align: center;
+        }
+        /* Food section: offset the whole section and arrange photos together. */
+        #food {
+            width: 86%;
+            margin-left: 14%;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        #food .food-photo {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            align-items: center;
+            justify-items: center;
+            gap: 18px;
+            order: 2;
+        }
+        #food .food-photo img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 280px;
+            object-fit: initial;
+        }
+        @media (max-width: 700px) {
+            #food { width: 100%; margin-left: 0; }
+            #food .food-photo { grid-template-columns: 1fr; gap: 20px; }
+            #food .food-photo img { max-height: 350px; }
+        }
+        #food .food-photo figure {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 0;
+        }
+        .warsaw-info-link {
+            text-align: center;
+            margin: 38px auto 48px;
+        }
+        .warsaw-info-link a {
+            color: #a74713;
+            font-size: clamp(1.2rem, 2.2vw, 1.55rem);
+            font-weight: bold;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+        .warsaw-info-link a:hover { color: #7c310c; }
+        /* Warm terracotta for actions and information links. */
+        .button { background: #b4532a; color: #ffffff; }
+        .button:hover { background: #873a1d; }
+        .warsaw-info-link a, footer a { color: #b4532a; }
+        .warsaw-info-link a:hover, footer a:hover { color: #873a1d; }
+        .button { background: #315e4d; color: #ffffff; }
+        .button:hover { background: #23483a; }
+        .button {
+            background: #d6ead6;
+            color: #173c2d;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
+        }
+        .button:hover { background: #e8f4e7; }
+        /* Consistent colors, readable text, and unified photo details. */
+        .intro h2, .section h2, .closing h2 { color: #3f6b5b; }
+        .nav-links a { color: #542080; }
+        .button { background: #d6ead6; color: #173c2d; }
+        .button:hover { background: #e8f4e7; }
+        .warsaw-info-link a, footer a { color: #b4532a; }
+        .warsaw-info-link a:hover, footer a:hover { color: #873a1d; }
+        main p:not(.section-label):not(.eyebrow):not(.warsaw-info-link) {
+            font-size: 1.06rem;
+            line-height: 1.75;
+        }
+        main figcaption, #shopping .shopping-photos figcaption {
+            margin-top: 8px;
+            color: #542080;
+            font-size: 1rem;
+            line-height: 1.4;
+            font-style: italic;
+            text-align: center;
+        }
+        main img.photo {
+            border: 2px solid #9b48b8;
+            border-radius: 4px;
+            box-shadow: 0 8px 24px rgba(83, 39, 116, 0.15);
+        }
+        .palace-gallery, #nature .walking-gallery, #food .food-photo {
+            gap: 24px;
+        }
+        .palace-side, #shopping .shopping-photos { gap: 24px; }
+        /* Give paragraphs more room and balance their final lines. */
+        .intro { max-width: 900px; }
+        #nature, #food { width: 92%; margin-left: 8%; }
+        #shopping { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 35px; }
+        main p:not(.section-label):not(.eyebrow):not(.warsaw-info-link) {
+            text-wrap: pretty;
+            overflow-wrap: break-word;
+        }
+        .closing p:not(.eyebrow) { max-width: 800px; }
+        @media (max-width: 700px) {
+            #nature, #food { width: 100%; margin-left: 0; }
+            #shopping { grid-template-columns: 1fr; gap: 24px; }
+        }
+        /* Slightly larger text on the two footer lines. */
+        footer { font-size: 1rem; }
+        .hero { border-bottom: 5px solid #ffd34e; }
+        /* A balanced hierarchy for the page headings. */
+        .hero h1 { font-size: clamp(2.4rem, 5vw, 3.75rem); }
+        .intro h2, .closing h2 { font-size: clamp(1.8rem, 3vw, 2.125rem); }
+        .section h2 { font-size: clamp(1.55rem, 2.6vw, 1.875rem); }
+        .section-label { font-size: 0.85rem; }
+        #shopping .shopping-photos figure { width: min(100%, 300px); }
+        #shopping .shopping-photos figure img {
+            display: block;
+            width: 100%;
+            height: 210px;
+            max-width: 100%;
+            max-height: none;
+            object-fit: cover;
+        }
+        /* Soft, coordinated shadows for photos and the closing panel. */
+        main img.photo {
+            box-shadow: 0 8px 22px rgba(74, 54, 90, 0.14);
+        }
+        .closing {
+            box-shadow: 0 8px 22px rgba(74, 54, 90, 0.14);
+        }
+        main img.photo {
+            box-shadow: 0 10px 22px rgba(57, 37, 73, 0.38),
+                        0 3px 8px rgba(57, 37, 73, 0.22);
+        }
+        .closing {
+            box-shadow: 0 10px 24px rgba(57, 37, 73, 0.25);
+        }
+        .intro h2, .section h2, .closing h2 {
+            text-shadow: 1px 2px 5px rgba(44, 70, 56, 0.23);
+        }
+        /* Keep the longer navigation titles readable and centered when wrapped. */
+        .nav-links { justify-content: flex-end; gap: 10px 20px; }
+        @media (max-width: 900px) {
+            nav { justify-content: center; }
+            .nav-links { justify-content: center; }
+        }
+        /* Slightly stronger shadows for depth and contrast. */
+        main img.photo {
+            box-shadow: 0 11px 24px rgba(57, 37, 73, 0.44),
+                        0 3px 9px rgba(57, 37, 73, 0.27);
+        }
+        .closing { box-shadow: 0 11px 26px rgba(57, 37, 73, 0.32); }
+        .intro h2, .section h2, .closing h2 {
+            text-shadow: 1px 2px 5px rgba(44, 70, 56, 0.32);
+        }
+        .button { box-shadow: 0 5px 18px rgba(0, 0, 0, 0.65); }
+        .hero h1 { text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8); }
+        .hero p:not(.eyebrow) { text-shadow: 0 2px 9px rgba(0, 0, 0, 0.88); }
+        .intro h2, .section h2, .closing h2 {
+            text-shadow: 1px 2px 5px rgba(44, 70, 56, 0.48);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="map-background" aria-hidden="true">
+        <iframe
+            src="https://maps.google.com/maps?q=Warsaw%2C%20Poland&z=12&output=embed"
+            title="Map of Warsaw"
+            tabindex="-1"
+        ></iframe>
+    </div>
+
+    <div class="map-overlay" aria-hidden="true"></div>
+
+    <nav>
+        <span class="logo">Discover Warsaw</span>
+
+        <div class="nav-links">
+            <a href="#sightseeing">Sightseeing</a>
+            <a href="#nature">Parks &amp; Walks</a>
+            <a href="#shopping">Shopping</a>
+            <a href="#food">Food &amp; Drink</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <p class="eyebrow">A city I keep coming back to</p>
+            <h1>Warsaw through my eyes</h1>
+            <p>
+                Join me as I share my favorite places and memories.
+            </p>
+            <a class="button" href="#sightseeing">Explore Warsaw ↓</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="intro">
+            <h2>A city full of surprises</h2>
+            <p>
+                Welcome to Warsaw!
+                <br>Whether you’re visiting for a weekend
+                or planning a longer stay, there’s plenty to explore.
+                Wander through lively neighborhoods, admire beautiful
+                architecture, and find your own favorite corner of the city.
+                <br>I've been to Warsaw 6 or 7 times (but who’s counting?) and
+                I still enjoy the city just as much as I did on my first visit.
+            </p>
+        </div>
+
+        <section class="section" id="sightseeing">
+            <p class="section-label">Sightseeing</p>
+            <h2>Explore the heart of Warsaw</h2>
+
+            <p>
+                Start your journey in Warsaw’s Old Town, where colorful
+                buildings and cobblestone streets surround the lively
+                Market Square. Visit the Royal Castle, then walk along the
+                Royal Route to discover elegant palaces, churches, and monuments.
+                <br>For a different perspective, head to the observation terrace
+                at the Palace of Culture and Science. 
+                <br>The Palace looks
+                spectacular in every season, especially when it’s lit up in the evening.
+                I already have a whole collection of photos of it, and I’ll never
+                get tired of taking more.
+            </p>
+
+            <div class="palace-gallery">
+                <figure class="palace-outer">
+                    <img class="photo" src="palacwinter.jpeg" alt="The palace in winter">
+                    <figcaption>January 2026</figcaption>
+                </figure>
+                <div class="palace-side">
+                    <figure>
+                        <img class="photo" src="palacmewinter.jpeg" alt="A winter memory at the palace">
+                        <figcaption>January 2026</figcaption>
+                    </figure>
+                    <figure>
+                        <img class="photo" src="palacme.jpeg" alt="A memory at the palace">
+                        <figcaption>September 2026</figcaption>
+                    </figure>
+                </div>
+                <figure class="palace-outer">
+                    <img class="photo" src="palacsummer.jpeg" alt="The palace in summer">
+                    <figcaption>August 2025</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section class="section" id="nature">
+            <p class="section-label">Parks & walks</p>
+            <h2>Walking through Warsaw</h2>
+
+            <div class="walking-text">
+                <p>
+                    Warsaw is a great city to explore on foot, whether
+                    you’re looking for a peaceful park or a lively
+                    neighborhood. Łazienki Park is a favorite for its
+                    gardens, historic buildings, and the beautiful
+                    Palace on the Isle. 
+                    <br> You can also stroll along the
+                    Vistula River, where walking and cycling paths offer
+                    a different view of the city.
+<br>I took the idea of “going for a walk” a little too far...
+                    What started as an easy stroll to the Vistula River
+                    turned into a five-hour walk through Praga, one of the
+                    city’s most interesting neighborhoods, known for its
+                    graffiti. It was a wonderful opportunity to discover
+                    street art, get a feel for the rhythm of local life,
+                    and explore the neighborhood’s hidden corners.
+                </p>
+            </div>
+
+            <div class="walking-gallery">
+                <figure class="river-photo">
+                    <img
+                        class="photo"
+                        src="visla.jpeg"
+                        alt="A view of the Vistula River in Warsaw"
+                    >
+                    <figcaption>Vistula River</figcaption>
+                </figure>
+
+                <figure class="mural-photo">
+                    <img
+                        class="photo"
+                        src="fightclub.jpeg"
+                        alt="Warsaw Fight Club mural"
+                    >
+                    <figcaption>“Warsaw Fight Club” mural</figcaption>
+                </figure>
+
+                <figure class="mural-photo">
+                    <img
+                        class="photo"
+                        src="swiatynia.jpeg"
+                        alt="Świątynia mural"
+                    >
+                    <figcaption>Świątynia (Shrine) mural</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section class="section split-section" id="shopping">
+            <div>
+                <p class="section-label">Shopping</p>
+                <h2>Find something special</h2>
+
+                <p>
+                    Whether you’re looking for fashion, souvenirs, or Polish
+                    design, Warsaw has plenty of shopping options.
+                    <br>Explore the shops along Nowy Świat and Chmielna streets,
+                    or visit a shopping center such as Arkadia (let’s keep
+                    the number of hours I spent there on my last visit a
+                    secret...). 
+                    <br>For something unique, look for independent
+                    boutiques and local markets (look at those cute ducks in the shop I found on Chmielna Street!).
+                </p>
+            </div>
+
+            <div class="shopping-photos">
+                <figure>
+                    <img class="photo" src="arkadia.jpg" alt="An illustration of Arkadia shopping mall">
+                    <figcaption>Arkadia Mall</figcaption>
+                </figure>
+                <figure>
+                    <img class="photo" src="ducks.jpeg" alt="Ducks at a shop on Chmielna Street">
+                    <figcaption>Warsaw Duck Store</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section class="section split-section" id="food">
+            <div class="food-photo">
+                <figure>
+                    <img class="photo" src="dessert1.PNG" alt="Coffee bean monoporcje">
+                    <figcaption>Coffee bean monoporcje</figcaption>
+                </figure>
+                <figure>
+                    <img class="photo" src="dessertme.jpeg" alt="Blueberry monoporcje">
+                    <figcaption>Blueberry monoporcje</figcaption>
+                </figure>
+                <figure>
+                    <img class="photo" src="pierogi.jpeg" alt="Pierogi in Zapiecek">
+                    <figcaption>Pierogi in Zapiecek</figcaption>
+                </figure>
+            </div>
+
+            <div>
+                <p class="section-label">Food & drink</p>
+                <h2>Taste your way through Warsaw</h2>
+
+                <p>
+                    Warsaw’s food scene offers everything from traditional
+                    Polish dishes to flavors from around the world.
+                    <br>For an affordable meal, visit a milk bar—a casual eatery
+                    serving classic Polish comfort food. Try pierogi, żurek,
+                    or a slice of Polish cheesecake at a local restaurant or
+                    café. And of course, you can find many variations of
+                    popular fruit desserts <i>(monoporcje)</i>! Personally, the blueberry one was my favorite...
+                </p>
+            </div>
+        </section>
+
+        <p class="warsaw-info-link">
+            <a href="https://go2warsaw.pl/en/main-page/" target="_blank" rel="noopener noreferrer">For more information about Warsaw, visit here</a>
+        </p>
+        <section class="closing">
+            <p class="eyebrow">A city to remember</p>
+            <h2>See you in Warsaw!</h2>
+            <p>
+                Every time I return to Warsaw, I find another reason to love it—whether it’s a familiar 
+                view, a new place to explore, or a delicious dessert. After six or seven visits, 
+                the city still surprises me, and I’m already looking forward to discovering more on my next trip. 
+                <br>I hope my experiences inspire you to find your own favorite places in Warsaw!
+            </p>
+        </section>
+    </main>
+
+    <footer>
+        <p>Made for everyone dreaming of Warsaw</p>
+        <p>
+            <a href="https://maps.google.com/?q=Warsaw%2C+Poland" target="_blank" rel="noopener noreferrer">
+                View Warsaw on Google Maps
+            </a>
+        </p>
+    </footer>
+</body>
+</html>
