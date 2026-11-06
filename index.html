@@ -97,7 +97,7 @@
             inset: 0;
             z-index: -2;
             background:
-                url("warsaw-sunny.jpg")
+                url("palacme-wide.jpg")
                 center / cover no-repeat;
         }
 
@@ -723,6 +723,14 @@
         .intro h2, .section h2, .closing h2 {
             text-shadow: 1px 2px 5px rgba(44, 70, 56, 0.48);
         }
+        /* Favor the right side of the photo and crop part of the left. */
+        .hero::before {
+            background-size: 120% auto;
+            background-position: right center;
+        }
+        @media (max-width: 700px) {
+            .hero::before { background-size: cover; background-position: 60% center; }
+        }
     </style>
 </head>
 
@@ -801,7 +809,7 @@
                         <figcaption>January 2026</figcaption>
                     </figure>
                     <figure>
-                        <img class="photo" src="palacme.jpeg" alt="A memory at the palace">
+                        <img class="photo" src="panorama.jpeg" alt="A panoramic view of Warsaw at dusk">
                         <figcaption>September 2026</figcaption>
                     </figure>
                 </div>
